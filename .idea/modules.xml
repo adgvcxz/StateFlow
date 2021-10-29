@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/StateFlow.iml" filepath="$PROJECT_DIR$/.idea/modules/StateFlow.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/StateFlow.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/StateFlow.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/stateflow/StateFlow.stateflow.iml" filepath="$PROJECT_DIR$/.idea/modules/stateflow/StateFlow.stateflow.iml" />
     </modules>
   </component>
 </project>
