@@ -2,6 +2,7 @@ package com.adgvcxz.stateflow
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -16,16 +17,17 @@ abstract class AFViewModel<M> : ViewModel() {
 
     abstract val initState: M
 
+    @FlowPreview
     @Suppress("DeferredResultUnused")
     val state: SharedFlow<M> by lazy {
         _uiState = MutableStateFlow(initState)
         viewModelScope.launch {
-            action.collect {
-                val event = transformEvent(it)
-                val mutation = mutate(event)?.let { value -> transformMutation(value) }
-                mutation?.let { value -> scan(_uiState.value, value) }?.let { value ->
-                    _uiState.value = value
-                }
+            val event = transformEvent(action)
+            val afterAction = event.flatMapMerge { mutate(it) }
+            val mutation = transformMutation(afterAction)
+            mutation.collect {
+                reduce(_uiState.value, it)?.run { _uiState.value = this }
+
             }
         }
         _uiState.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
@@ -34,14 +36,17 @@ abstract class AFViewModel<M> : ViewModel() {
     val currentState: M get() = if (::_uiState.isInitialized) _uiState.value else initState
 
 
-    open suspend fun transformEvent(event: IEvent): IEvent = event
-    open suspend fun transformMutation(mutation: IMutation): IMutation = mutation
+    open suspend fun transformEvent(event: Flow<IEvent>): Flow<IEvent> = event
+    open suspend fun transformMutation(mutation: Flow<IMutation>): Flow<IMutation> = mutation
 
-    open suspend fun mutate(event: IEvent): IMutation? {
-        return event as? IMutation
+    open suspend fun mutate(event: IEvent): Flow<IMutation> {
+        if (event is IMutation) {
+            return flow { emit(event) }
+        }
+        return emptyFlow()
     }
 
-    open fun scan(state: M, mutation: IMutation): M = state
+    open fun reduce(state: M, mutation: IMutation): M = state
 
 
 }

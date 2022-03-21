@@ -6,10 +6,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.adgvcxz.stateflow.*
 import com.adgvcxz.stateflow.simple.databinding.ActivityMainBinding
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import reactivecircus.flowbinding.android.view.clicks
 
 
@@ -22,17 +22,19 @@ data class MainModel(
 class MainViewModel(index: Int) : AFViewModel<MainModel>() {
     override val initState: MainModel = MainModel(index, index, true)
 
-    override suspend fun mutate(event: IEvent): IMutation? {
+    override suspend fun mutate(event: IEvent): Flow<IMutation> {
         if (event is Add) {
-            return withContext(Dispatchers.IO) {
+            return flow {
                 delay(event.time.toLong())
-                SetValue(if (currentState.current) currentState.index1 * 2 else currentState.index2 * 2)
+                emit(SetValue(if (currentState.current) currentState.index1 * 2 else currentState.index2 * 2))
+                delay(event.time.toLong())
+                emit(SetValue(if (currentState.current) currentState.index1 * 2 else currentState.index2 * 2))
             }
         }
         return super.mutate(event)
     }
 
-    override fun scan(state: MainModel, mutation: IMutation): MainModel {
+    override fun reduce(state: MainModel, mutation: IMutation): MainModel {
         if (mutation is SetValue) {
             return if (state.current) {
                 state.copy(index1 = mutation.value)
