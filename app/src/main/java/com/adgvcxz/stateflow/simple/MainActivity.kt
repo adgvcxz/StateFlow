@@ -1,16 +1,15 @@
 package com.adgvcxz.stateflow.simple
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.adgvcxz.stateflow.*
 import com.adgvcxz.stateflow.simple.databinding.ActivityMainBinding
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import reactivecircus.flowbinding.android.view.clicks
 
 
@@ -57,18 +56,17 @@ class MainActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(this, MainFactory(1))[MainViewModel::class.java]
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+
         viewModel.bindModelWhenCreated(this) {
             add({ index1 }, { binding.textView.text = "$this" })
-            add({ index2 }, {
-                binding.textView1.text = "$this"
-            })
+            add({ index2 }, { binding.textView1.text = "$this" })
         }
-        binding.button1.clicks().onEach {
-            viewModel.event.emit(Add(100))
-        }.launchIn(lifecycleScope)
-        binding.button2.clicks().onEach {
-            viewModel.event.emit(Add(200))
-        }.launchIn(lifecycleScope)
+
+        viewModel.bindEvent(this) {
+            add(binding.button1.clicks(), Add(100))
+            add(binding.button2.clicks(), { Add(100) })
+        }
     }
 }
 

@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
  */
 abstract class AFViewModel<M> : ViewModel() {
 
-    val event: MutableSharedFlow<IEvent> = MutableSharedFlow()
+    val action: MutableSharedFlow<IEvent> = MutableSharedFlow()
 
     private lateinit var _uiState: MutableStateFlow<M>
 
@@ -20,7 +20,7 @@ abstract class AFViewModel<M> : ViewModel() {
     val state: SharedFlow<M> by lazy {
         _uiState = MutableStateFlow(initState)
         viewModelScope.launch {
-            event.collect {
+            action.collect {
                 val event = transformEvent(it)
                 val mutation = mutate(event)?.let { value -> transformMutation(value) }
                 mutation?.let { value -> scan(_uiState.value, value) }?.let { value ->

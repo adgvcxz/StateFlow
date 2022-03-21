@@ -12,10 +12,10 @@ import kotlinx.coroutines.flow.*
  */
 class ViewModelBuilder<M> {
 
-    private val items = arrayListOf<ViewModelItem<M, Any, Any>>()
+    private val items = mutableListOf<ViewModelItem<M, Any, Any>>()
 
     @FlowPreview
-    suspend fun build(scope: CoroutineScope, viewModel: AFViewModel<M>) {
+    fun build(scope: CoroutineScope, viewModel: AFViewModel<M>) {
         items.forEach { item ->
             scope.async {
                 viewModel.state.map { item.value.invoke(it) }
