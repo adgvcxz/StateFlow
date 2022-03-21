@@ -6,38 +6,42 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
-import com.adgvcxz.stateflow.AFViewModel
-import com.adgvcxz.stateflow.IEvent
-import com.adgvcxz.stateflow.IMutation
+import com.adgvcxz.stateflow.*
 import com.adgvcxz.stateflow.simple.databinding.ActivityMainBinding
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import reactivecircus.flowbinding.android.view.clicks
 
 
-class MainViewModel(index: Int) : AFViewModel<Int>() {
-    override val initState: Int = index
+data class MainModel(
+    var index1: Int,
+    var index2: Int,
+    var current: Boolean
+)
+
+class MainViewModel(index: Int) : AFViewModel<MainModel>() {
+    override val initState: MainModel = MainModel(index, index, true)
 
     override suspend fun mutate(event: IEvent): IMutation? {
         if (event is Add) {
             return withContext(Dispatchers.IO) {
                 delay(event.time.toLong())
-                SetValue(currentState * 2)
+                SetValue(if (currentState.current) currentState.index1 * 2 else currentState.index2 * 2)
             }
         }
         return super.mutate(event)
     }
 
-    override fun scan(state: Int, mutation: IMutation): Int {
-        if (mutation is SetValue) return mutation.value
-        return super.scan(state, mutation)
+    override fun scan(state: MainModel, mutation: IMutation): MainModel {
+        if (mutation is SetValue) {
+            return if (state.current) {
+                state.copy(index1 = mutation.value)
+            } else {
+                state.copy(index2 = mutation.value)
+            }
+        }
+        return state
     }
 }
 
@@ -46,27 +50,24 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: MainViewModel
 
+
+    @FlowPreview
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(this, MainFactory(1))[MainViewModel::class.java]
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        lifecycleScope.launchWhenCreated {
-            viewModel.state.collect {
-                Log.e("zhaow", "${System.currentTimeMillis()}")
-                binding.textView.text = "$it"
-            }
-        }
-        lifecycleScope.launchWhenCreated {
-            viewModel.state.distinctUntilChanged().collect {
-                binding.textView1.text = "$it"
-            }
+        viewModel.bindModelWhenCreated(this) {
+            add({ index1 }, { binding.textView.text = "$this" })
+            add({ index2 }, {
+                binding.textView1.text = "$this"
+            })
         }
         binding.button1.clicks().onEach {
-            viewModel.event.send(Add(1000))
+            viewModel.event.emit(Add(100))
         }.launchIn(lifecycleScope)
         binding.button2.clicks().onEach {
-            viewModel.event.send(Add(2000))
+            viewModel.event.emit(Add(200))
         }.launchIn(lifecycleScope)
     }
 }
