@@ -59,7 +59,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
         viewModel.bindModelWhenCreated(this) {
             add({ index1 }, { binding.textView.text = "$this" })
             add({ index2 }, { binding.textView1.text = "$this" })

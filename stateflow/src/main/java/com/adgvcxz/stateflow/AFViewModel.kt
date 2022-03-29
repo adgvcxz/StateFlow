@@ -1,7 +1,6 @@
 package com.adgvcxz.stateflow
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -47,6 +46,12 @@ abstract class AFViewModel<M> : ViewModel() {
     }
 
     open fun reduce(state: M, mutation: IMutation): M = state
+
+    suspend fun bind(lifecycle: Lifecycle) {
+        lifecycle.whenCreated {
+
+        }
+    }
 
 
 }

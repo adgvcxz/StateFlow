@@ -1,6 +1,5 @@
 package com.adgvcxz.stateflow
 
-import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.CoroutineScope

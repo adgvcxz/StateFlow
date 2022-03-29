@@ -4,8 +4,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 /**
  * Created by zhaowei on 2021/10/29.
@@ -17,7 +17,7 @@ class ViewModelBuilder<M> {
     @FlowPreview
     fun build(scope: CoroutineScope, viewModel: AFViewModel<M>) {
         items.forEach { item ->
-            scope.async {
+            scope.launch {
                 viewModel.state.map { item.value.invoke(it) }
                     .flatMapMerge { value ->
                         val result = flow { emit(value) }
@@ -68,9 +68,9 @@ fun <M> AFViewModel<M>.bindModelWhenCreated(
     owner: LifecycleOwner,
     init: ViewModelBuilder<M>.() -> Unit
 ) {
+    val builder = ViewModelBuilder<M>()
+    builder.init()
     owner.lifecycleScope.launchWhenCreated {
-        val builder = ViewModelBuilder<M>()
-        builder.init()
         builder.build(this, this@bindModelWhenCreated)
     }
 }
