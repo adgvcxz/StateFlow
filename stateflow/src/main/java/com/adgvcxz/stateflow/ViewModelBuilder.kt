@@ -1,7 +1,9 @@
 package com.adgvcxz.stateflow
 
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
@@ -72,6 +74,21 @@ fun <M> AFViewModel<M>.bindModelWhenCreated(
     builder.init()
     owner.lifecycleScope.launchWhenCreated {
         builder.build(this, this@bindModelWhenCreated)
+    }
+}
+
+@FlowPreview
+fun <M> AFViewModel<M>.bind(
+    owner: LifecycleOwner,
+    state: Lifecycle.State = Lifecycle.State.STARTED,
+    init: ViewModelBuilder<M>.() -> Unit
+) {
+    val builder = ViewModelBuilder<M>()
+    builder.init()
+    owner.lifecycleScope.launch {
+        owner.repeatOnLifecycle(state) {
+            builder.build(this, this@bind)
+        }
     }
 }
 
