@@ -8,39 +8,51 @@ import com.adgvcxz.stateflow.*
 import com.adgvcxz.stateflow.simple.databinding.ActivityMainBinding
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 import reactivecircus.flowbinding.android.view.clicks
 
+enum class MainStatus {
+    Normal, Timing, Pause
+}
 
 data class MainModel(
-    var index1: Int,
-    var index2: Int,
-    var current: Boolean
+    var status: MainStatus = MainStatus.Normal,
+    var seconds: Int = 0
 )
 
-class MainViewModel(index: Int) : AFViewModel<MainModel>() {
-    override val initState: MainModel = MainModel(index, index, true)
+object Start : IEvent
+object Pause : IEvent
+object Stop : IEvent
+
+data class SetSeconds(val seconds: Int) : IMutation
+data class SetStatus(val status: MainStatus) : IMutation
+
+class MainViewModel(seconds: Int) : AFViewModel<MainModel>() {
+    override val initState: MainModel = MainModel(seconds = seconds)
+
 
     override suspend fun mutate(event: IEvent): Flow<IMutation> {
-        if (event is Add) {
-            return flow {
-                delay(event.time.toLong())
-                emit(SetValue(if (currentState.current) currentState.index1 * 2 else currentState.index2 * 2))
-                delay(event.time.toLong())
-                emit(SetValue(if (currentState.current) currentState.index1 * 2 else currentState.index2 * 2))
+        when (event) {
+            Start -> if (currentState.status != MainStatus.Timing) {
+                return flow<IMutation> {
+                    while (true) {
+                        emit(SetSeconds(currentState.seconds + 1))
+                        delay(1000)
+                    }
+                }.withIndex().takeWhile {
+                    it.index == 0 || currentState.status == MainStatus.Timing
+                }.map { it.value }.onStart { emit(SetStatus(MainStatus.Timing)) }
             }
+            Pause -> return flowOf(SetStatus(MainStatus.Pause))
+            Stop -> return flowOf(SetStatus(MainStatus.Normal), SetSeconds(0))
         }
         return super.mutate(event)
     }
 
     override fun reduce(state: MainModel, mutation: IMutation): MainModel {
-        if (mutation is SetValue) {
-            return if (state.current) {
-                state.copy(index1 = mutation.value)
-            } else {
-                state.copy(index2 = mutation.value)
-            }
+        when (mutation) {
+            is SetSeconds -> return state.copy(seconds = mutation.seconds)
+            is SetStatus -> return state.copy(status = mutation.status)
         }
         return state
     }
@@ -55,25 +67,21 @@ class MainActivity : AppCompatActivity() {
     @FlowPreview
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this, MainFactory(1))[MainViewModel::class.java]
+        viewModel = ViewModelProvider(this, MainFactory(50))[MainViewModel::class.java]
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         viewModel.bindModelWhenCreated(this) {
-            add({ index1 }, { binding.textView.text = "$this" })
-            add({ index2 }, { binding.textView1.text = "$this" })
+            add({ seconds }, { binding.textView.text = "$this" })
         }
 
         viewModel.bindEvent(this) {
-            add(binding.button1.clicks(), Add(100))
-            add(binding.button2.clicks(), { Add(100) })
+            add(binding.start.clicks(), Start)
+            add(binding.pause.clicks(), { Pause })
+            add(binding.stop.clicks(), { Stop })
         }
     }
 }
-
-data class Add(val time: Int) : IEvent
-data class SetValue(val value: Int) : IMutation
-
 
 class MainFactory(private val index: Int) : ViewModelProvider.NewInstanceFactory() {
 
