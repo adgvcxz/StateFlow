@@ -1,6 +1,7 @@
 package com.adgvcxz.stateflow.simple
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,6 +42,7 @@ class TimerViewModel(seconds: Int) : AFViewModel<TimerModel>() {
     override suspend fun mutate(event: IEvent): Flow<IMutation> {
         when (event) {
             Start -> if (currentState.status != TimerStatus.Timing) {
+                emit(SetStatus(TimerStatus.Timing))
                 return flow<IMutation> {
                     while (true) {
                         emit(SetSeconds(currentState.seconds + 1))
@@ -48,7 +50,7 @@ class TimerViewModel(seconds: Int) : AFViewModel<TimerModel>() {
                     }
                 }.withIndex().takeWhile {
                     it.index == 0 || currentState.status == TimerStatus.Timing
-                }.map { it.value }.onStart { emit(SetStatus(TimerStatus.Timing)) }
+                }.map { it.value }
             }
             Pause -> return flowOf(SetStatus(TimerStatus.Pause))
             Stop -> return flowOf(SetStatus(TimerStatus.Normal), SetSeconds(0))

@@ -8,4 +8,8 @@
         android:id="@+id/fragment_timer"
         android:name="com.adgvcxz.stateflow.simple.TimerFragment"
         android:label="TimerFragment" />
+    <fragment
+        android:id="@+id/fragment_login"
+        android:name="com.adgvcxz.stateflow.simple.LoginFragment"
+        android:label="LoginFragment" />
 </navigation>

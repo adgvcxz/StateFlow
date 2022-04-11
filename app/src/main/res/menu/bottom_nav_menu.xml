@@ -5,4 +5,8 @@
         android:id="@+id/fragment_timer"
         android:title="Timer" />
 
+    <item
+        android:id="@+id/fragment_login"
+        android:title="Login" />
+
 </menu>

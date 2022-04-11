@@ -12,6 +12,8 @@ abstract class AFViewModel<M> : ViewModel() {
 
     val action: MutableSharedFlow<IEvent> = MutableSharedFlow()
 
+    private val mutation: MutableSharedFlow<IMutation> = MutableSharedFlow()
+
     private lateinit var _uiState: MutableStateFlow<M>
 
     abstract val initState: M
@@ -23,10 +25,9 @@ abstract class AFViewModel<M> : ViewModel() {
         viewModelScope.launch {
             val event = transformEvent(action)
             val afterAction = event.flatMapMerge { mutate(it) }
-            val mutation = transformMutation(afterAction)
+            val mutation = transformMutation(merge(afterAction, mutation))
             mutation.collect {
                 reduce(_uiState.value, it)?.run { _uiState.value = this }
-
             }
         }
         _uiState.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
@@ -47,11 +48,9 @@ abstract class AFViewModel<M> : ViewModel() {
 
     open fun reduce(state: M, mutation: IMutation): M = state
 
-    suspend fun bind(lifecycle: Lifecycle) {
-        lifecycle.whenCreated {
-
-        }
+    suspend fun emit(mutation: IMutation) {
+        this.mutation.emit(mutation)
     }
 
-
+    fun <T> merge(vararg flows: Flow<T>): Flow<T> = flowOf(*flows).flattenMerge()
 }
