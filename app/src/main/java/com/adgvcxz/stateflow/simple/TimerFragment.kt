@@ -1,7 +1,6 @@
 package com.adgvcxz.stateflow.simple
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,7 +36,6 @@ data class SetStatus(val status: TimerStatus) : IMutation
 
 class TimerViewModel(seconds: Int) : AFViewModel<TimerModel>() {
     override val initState: TimerModel = TimerModel(seconds = seconds)
-
 
     override suspend fun mutate(event: IEvent): Flow<IMutation> {
         when (event) {
@@ -84,15 +82,20 @@ class TimerFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentTimerBinding.inflate(inflater, container, false)
+
+        //输出
         viewModel.bind(this) {
             add({ seconds }, { binding.textView.text = "$this" })
         }
 
+        //输入
         viewModel.bindEvent(this) {
             add(binding.start.clicks(), Start)
             add(binding.pause.clicks(), { Pause })
-            add(binding.stop.clicks(), { Stop })
+            add(binding.stop.clicks(), Stop)
         }
+
+
         return binding.root
     }
 

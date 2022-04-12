@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.adgvcxz.stateflow.*
 import com.adgvcxz.stateflow.simple.databinding.FragmentLoginBinding
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import reactivecircus.flowbinding.android.view.clicks
@@ -66,19 +67,19 @@ class LoginFragment : Fragment() {
 
     private val binding get() = _binding!!
 
+    @OptIn(FlowPreview::class)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
-        binding.email.setText(viewModel.currentState.email)
-        binding.password.setText(viewModel.currentState.password)
+//        binding.email.setText(viewModel.currentState.email)
+//        binding.password.setText(viewModel.currentState.password)
+
         viewModel.bind(this) {
             add({ "邮箱: $email\n密码: $password" }, { binding.content.text = this })
         }
-
-
         viewModel.bindEvent(this) {
             add(binding.email.textChanges(), { SetEmail(this.toString()) })
             add(binding.password.textChanges(), { SetPassword(this.toString()) })
