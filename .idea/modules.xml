@@ -4,7 +4,13 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/StateFlow.iml" filepath="$PROJECT_DIR$/.idea/modules/StateFlow.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/StateFlow.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/StateFlow.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/StateFlow.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/StateFlow.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/StateFlow.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/StateFlow.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/StateFlow.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/StateFlow.app.unitTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/stateflow/StateFlow.stateflow.iml" filepath="$PROJECT_DIR$/.idea/modules/stateflow/StateFlow.stateflow.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/stateflow/StateFlow.stateflow.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/stateflow/StateFlow.stateflow.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/stateflow/StateFlow.stateflow.main.iml" filepath="$PROJECT_DIR$/.idea/modules/stateflow/StateFlow.stateflow.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/stateflow/StateFlow.stateflow.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/stateflow/StateFlow.stateflow.unitTest.iml" />
     </modules>
   </component>
 </project>
